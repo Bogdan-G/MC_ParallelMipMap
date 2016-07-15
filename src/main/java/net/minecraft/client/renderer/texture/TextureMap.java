@@ -116,6 +116,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 		Iterator iterator = this.mapRegisteredSprites.entrySet().iterator();
 		TextureAtlasSprite textureatlassprite;
 
+		/* TODO 2 kek
 		while (!skipFirst && iterator.hasNext())
 		{
 			Entry entry = (Entry) iterator.next();
@@ -197,6 +198,12 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 
 			j = Math.min(j, Math.min(textureatlassprite.getIconWidth(), textureatlassprite.getIconHeight()));
 			stitcher.addSprite(textureatlassprite);
+		} */
+		if (!skipFirst) {
+		com.gamerforea.parallelmipmap.ParallelUtils.generateMipMaps_MultiThread2(iterator, bar, this.mipmapLevels, p_110571_1_, this.anisotropicFiltering, this.basePath);
+		stitcher = com.gamerforea.parallelmipmap.ParallelUtils.stitcher2;
+		if (com.gamerforea.parallelmipmap.ParallelUtils.jpu0 != j) j = com.gamerforea.parallelmipmap.ParallelUtils.jpu0;
+		if (com.gamerforea.parallelmipmap.ParallelUtils.sprite2 != null) textureatlassprite = com.gamerforea.parallelmipmap.ParallelUtils.sprite2;
 		}
 
 		cpw.mods.fml.common.ProgressManager.pop(bar);
@@ -269,7 +276,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 		}
 		catch (StitcherException stitcherexception)
 		{
-			throw stitcherexception;
+			//throw stitcherexception;
 		}
 
 		logger.info("Created: {}x{} {}-atlas", new Object[] { Integer.valueOf(stitcher.getCurrentWidth()), Integer.valueOf(stitcher.getCurrentHeight()), this.basePath });
@@ -292,11 +299,12 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 			}
 			catch (Throwable throwable)
 			{
-				CrashReport crashreport1 = CrashReport.makeCrashReport(throwable, "Stitching texture atlas");
+				/*CrashReport crashreport1 = CrashReport.makeCrashReport(throwable, "Stitching texture atlas");
 				CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Texture being stitched together");
 				crashreportcategory1.addCrashSection("Atlas path", this.basePath);
 				crashreportcategory1.addCrashSection("Sprite", textureatlassprite);
-				throw new ReportedException(crashreport1);
+				throw new ReportedException(crashreport1);*/
+				continue;
 			}
 
 			if (textureatlassprite.hasAnimationMetadata())
