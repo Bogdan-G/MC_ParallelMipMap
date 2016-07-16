@@ -35,6 +35,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
+import com.gamerforea.parallelmipmap.ParallelUtils;
 
 @SideOnly(Side.CLIENT)
 public class TextureMap extends AbstractTexture implements ITickableTextureObject, IIconRegister
@@ -104,7 +105,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 
 	public void loadTextureAtlas(IResourceManager p_110571_1_)
 	{
-		registerIcons(); //Re-gather list of Icons, allows for addition/removal of blocks/items after this map was initially constructed.
+		/*registerIcons(); //Re-gather list of Icons, allows for addition/removal of blocks/items after this map was initially constructed.
 
 		int i = Minecraft.getGLMaximumTextureSize();
 		Stitcher stitcher = new Stitcher(i, i, true, 0, this.mipmapLevels);
@@ -114,7 +115,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 		ForgeHooksClient.onTextureStitchedPre(this);
 		cpw.mods.fml.common.ProgressManager.ProgressBar bar = cpw.mods.fml.common.ProgressManager.push("Texture Loading", skipFirst ? 0 : this.mapRegisteredSprites.size());
 		Iterator iterator = this.mapRegisteredSprites.entrySet().iterator();
-		TextureAtlasSprite textureatlassprite;
+		TextureAtlasSprite textureatlassprite;*/
 
 		/* TODO 2 kek
 		while (!skipFirst && iterator.hasNext())
@@ -199,14 +200,14 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 			j = Math.min(j, Math.min(textureatlassprite.getIconWidth(), textureatlassprite.getIconHeight()));
 			stitcher.addSprite(textureatlassprite);
 		} */
-		if (!skipFirst) {
+		/*if (!skipFirst) {
 		com.gamerforea.parallelmipmap.ParallelUtils.generateMipMaps_MultiThread2(iterator, bar, this.mipmapLevels, p_110571_1_, this.anisotropicFiltering, this.basePath);
 		stitcher = com.gamerforea.parallelmipmap.ParallelUtils.stitcher2;
 		if (com.gamerforea.parallelmipmap.ParallelUtils.jpu0 != j) j = com.gamerforea.parallelmipmap.ParallelUtils.jpu0;
 		if (com.gamerforea.parallelmipmap.ParallelUtils.sprite2 != null) textureatlassprite = com.gamerforea.parallelmipmap.ParallelUtils.sprite2;
-		}
+		}*/
 
-		cpw.mods.fml.common.ProgressManager.pop(bar);
+		/*cpw.mods.fml.common.ProgressManager.pop(bar);
 		int i1 = MathHelper.calculateLogBaseTwo(j);
 
 		if (i1 < this.mipmapLevels)
@@ -216,7 +217,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 		}
 
 		Iterator iterator1 = this.mapRegisteredSprites.values().iterator();
-		bar = cpw.mods.fml.common.ProgressManager.push("Mipmap generation", skipFirst ? 0 : this.mapRegisteredSprites.size());
+		bar = cpw.mods.fml.common.ProgressManager.push("Mipmap generation", skipFirst ? 0 : this.mapRegisteredSprites.size());*/
 
 		/* TODO ParallelMipMap replace:
 		while (!skipFirst && iterator1.hasNext())
@@ -260,10 +261,10 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 		        throw new ReportedException(crashreport);
 		    }
 		} */
-		if (!skipFirst) com.gamerforea.parallelmipmap.ParallelUtils.generateMipMaps_MultiThread(iterator1, bar, this.mipmapLevels);
+		//if (!skipFirst) com.gamerforea.parallelmipmap.ParallelUtils.generateMipMaps_MultiThread(iterator1, bar, this.mipmapLevels);
 		// TODO ParallelMipMap end
 
-		this.missingImage.generateMipmaps(this.mipmapLevels);
+		/*this.missingImage.generateMipmaps(this.mipmapLevels);
 		stitcher.addSprite(this.missingImage);
 		cpw.mods.fml.common.ProgressManager.pop(bar);
 		skipFirst = false;
@@ -298,13 +299,13 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 				TextureUtil.uploadTextureMipmap(textureatlassprite.getFrameTextureData(0), textureatlassprite.getIconWidth(), textureatlassprite.getIconHeight(), textureatlassprite.getOriginX(), textureatlassprite.getOriginY(), false, false);
 			}
 			catch (Throwable throwable)
-			{
+			{*/
 				/*CrashReport crashreport1 = CrashReport.makeCrashReport(throwable, "Stitching texture atlas");
 				CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Texture being stitched together");
 				crashreportcategory1.addCrashSection("Atlas path", this.basePath);
 				crashreportcategory1.addCrashSection("Sprite", textureatlassprite);
 				throw new ReportedException(crashreport1);*/
-				continue;
+				/*continue;
 			}
 
 			if (textureatlassprite.hasAnimationMetadata())
@@ -325,7 +326,9 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 			textureatlassprite.copyFrom(this.missingImage);
 		}
 		ForgeHooksClient.onTextureStitchedPost(this);
-		cpw.mods.fml.common.ProgressManager.pop(bar);
+		cpw.mods.fml.common.ProgressManager.pop(bar);*/
+		ParallelUtils.ParallelUtils_set(basePath, textureType, anisotropicFiltering, listAnimatedSprites, mapRegisteredSprites, mapUploadedSprites, mipmapLevels);
+		ParallelUtils.generateMipMaps_MultiThread3(p_110571_1_, missingImage);
 	}
 
 	private ResourceLocation completeResourceLocation(ResourceLocation p_147634_1_, int p_147634_2_)

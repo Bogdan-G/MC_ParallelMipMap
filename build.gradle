@@ -35,5 +35,6 @@ jar {
     manifest {
         attributes 'FMLCorePlugin': 'com.gamerforea.parallelmipmap.CoreMod'
         attributes 'FMLCorePluginContainsFMLMod': 'false'
+        attributes 'FMLAT': 'ParallelMipMap_at.cfg'
     }
 }
