@@ -67,7 +67,13 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 	private static int anisotropicFiltering;
 	private static boolean skipFirst = false;
 	public static TextureMap map;
-	public static AbstractTexture ATexture;
+	//public static AbstractTexture ATexture;
+	private static int i0 = -1;
+	private static boolean threadstart = false;
+	private static Stitcher stitcher0;
+	private static TextureAtlasSprite textureatlassprite0;
+	private static TextureAtlasSprite missingImage0;
+	private static IResourceManager p_110571_1_0;
 	
 	/*public static int jpu0 = Integer.MAX_VALUE;
 	public static TextureAtlasSprite sprite2 = null;
@@ -290,47 +296,58 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 		String basePath0 = basePath;
 		return p_147634_2_ == 0 ? new ResourceLocation(p_147634_1_.getResourceDomain(), String.format("%s/%s%s", new Object[] { basePath0, p_147634_1_.getResourcePath(), ".png" })) : new ResourceLocation(p_147634_1_.getResourceDomain(), String.format("%s/mipmaps/%s.%d%s", new Object[] { basePath0, p_147634_1_.getResourcePath(), Integer.valueOf(p_147634_2_), ".png" }));
 	}*/
-	public static void generateMipMaps_MultiThread3(final IResourceManager p_110571_1_, final TextureAtlasSprite missingImage)
+	public static void generateMipMaps_MultiThread3()
 	{
-		Thread[] workers3 = new Thread[1];
-		for (int workerId3 = 0; workerId3 < workers3.length; workerId3++)
-		{
+		//Thread[] workers3 = new Thread[1];
+		//for (int workerId3 = 0; workerId3 < workers3.length; workerId3++)
+		//{
+		if (!threadstart) {
+			
+			threadstart=true;
 			Thread worker3 = new Thread()
 			{
 				@Override
 				public void run()
 				{
-				loadTextureAtlas2(p_110571_1_, missingImage);
+				try {
+				loadTextureAtlas2();
+				Thread.yield();
+				} catch (Throwable e) {e.printStackTrace();}
 				}
 			};
-			worker3.setDaemon(true);
-			worker3.setName("MipMap worker3 #" + workerId3);
+			//worker3.setDaemon(true);
+			worker3.setName("MipMap worker3 # base"/* + workerId3*/);
 			worker3.start();
-			workers3[workerId3] = worker3;
-		}
+			}
+			//workers3[workerId3] = worker3;
+		//}
 
-		for (Thread worker3 : workers3)
-			try
-			{
-				worker3.join();
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
+		//for (Thread worker3 : workers3)
+			//try
+			//{
+				//Thread.yield();
+				//Thread.sleep(Integer.MAX_VALUE);
+				//worker3.wait();
+			//}
+			//catch (InterruptedException e)
+			//{
+				//e.printStackTrace();
+			//}
 	}
-		public static void loadTextureAtlas2(IResourceManager p_110571_1_, TextureAtlasSprite missingImage) {
-		registerIcons(); //Re-gather list of Icons, allows for addition/removal of blocks/items after this map was initially constructed.
+		public static void loadTextureAtlas2() {
+		//registerIcons(); //Re-gather list of Icons, allows for addition/removal of blocks/items after this map was initially constructed.
 
-		int i = Minecraft.getGLMaximumTextureSize();
-		Stitcher stitcher = new Stitcher(i, i, true, 0, mipmapLevels);
-		mapUploadedSprites.clear();
-		listAnimatedSprites.clear();
+		int i = i0;
+		Stitcher stitcher = stitcher0;
+		//mapUploadedSprites.clear();
+		//listAnimatedSprites.clear();
 		int j = Integer.MAX_VALUE;
-		ForgeHooksClient.onTextureStitchedPre(map);
-		cpw.mods.fml.common.ProgressManager.ProgressBar bar = cpw.mods.fml.common.ProgressManager.push("Texture Loading", skipFirst ? 0 : mapRegisteredSprites.size());
+		//ForgeHooksClient.onTextureStitchedPre(map);
+		//cpw.mods.fml.common.ProgressManager.ProgressBar bar = cpw.mods.fml.common.ProgressManager.push("Texture Loading", skipFirst ? 0 : mapRegisteredSprites.size());
 		Iterator iterator = mapRegisteredSprites.entrySet().iterator();
-		TextureAtlasSprite textureatlassprite;
+		TextureAtlasSprite missingImage = missingImage0;
+		TextureAtlasSprite textureatlassprite = textureatlassprite0;
+		IResourceManager p_110571_1_ = p_110571_1_0;
 
 		
 		while (!skipFirst && iterator.hasNext())
@@ -339,7 +356,7 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 			ResourceLocation resourcelocation = new ResourceLocation((String) entry.getKey());
 			textureatlassprite = (TextureAtlasSprite) entry.getValue();
 			ResourceLocation resourcelocation1 = completeResourceLocation(resourcelocation, 0);
-			bar.step(resourcelocation1.getResourcePath());
+			//bar.step(resourcelocation1.getResourcePath());
 
 			if (textureatlassprite.hasCustomLoader(p_110571_1_, resourcelocation))
 			{
@@ -416,7 +433,7 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 			stitcher.addSprite(textureatlassprite);
 		}
 
-		cpw.mods.fml.common.ProgressManager.pop(bar);
+		//cpw.mods.fml.common.ProgressManager.pop(bar);
 		int i1 = MathHelper.calculateLogBaseTwo(j);
 
 		if (i1 < mipmapLevels)
@@ -426,12 +443,12 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 		}
 
 		Iterator iterator1 = mapRegisteredSprites.values().iterator();
-		bar = cpw.mods.fml.common.ProgressManager.push("Mipmap generation", skipFirst ? 0 : mapRegisteredSprites.size());
+		//bar = cpw.mods.fml.common.ProgressManager.push("Mipmap generation", skipFirst ? 0 : mapRegisteredSprites.size());
 
 		while (!skipFirst && iterator1.hasNext())
 		{
 		    final TextureAtlasSprite textureatlassprite1 = (TextureAtlasSprite)iterator1.next();
-		    bar.step(textureatlassprite1.getIconName());
+		    //bar.step(textureatlassprite1.getIconName());
 		
 		    try
 		    {
@@ -473,13 +490,13 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 
 		missingImage.generateMipmaps(mipmapLevels);
 		stitcher.addSprite(missingImage);
-		cpw.mods.fml.common.ProgressManager.pop(bar);
+		//cpw.mods.fml.common.ProgressManager.pop(bar);
 		skipFirst = false;
-		bar = cpw.mods.fml.common.ProgressManager.push("Texture creation", 3);
+		//bar = cpw.mods.fml.common.ProgressManager.push("Texture creation", 3);
 
 		try
 		{
-			bar.step("Stitching");
+			//bar.step("Stitching");
 			stitcher.doStitch();
 		}
 		catch (StitcherException stitcherexception)
@@ -488,12 +505,12 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 		}
 
 		logger.info("Created: {}x{} {}-atlas", new Object[] { Integer.valueOf(stitcher.getCurrentWidth()), Integer.valueOf(stitcher.getCurrentHeight()), basePath });
-		bar.step("Allocating GL texture");
-		TextureUtil.allocateTextureImpl(getGlTextureId(), mipmapLevels, stitcher.getCurrentWidth(), stitcher.getCurrentHeight(), (float) anisotropicFiltering);
-		HashMap hashmap = Maps.newHashMap(mapRegisteredSprites);
+		//bar.step("Allocating GL texture");
+		/*TextureUtil.allocateTextureImpl(glTextureId, mipmapLevels, stitcher.getCurrentWidth(), stitcher.getCurrentHeight(), (float) anisotropicFiltering);
+		HashMap hashmap = new WeakHashMap(mapRegisteredSprites);
 		Iterator iterator2 = stitcher.getStichSlots().iterator();
 
-		bar.step("Uploading GL texture");
+		//bar.step("Uploading GL texture");
 		while (iterator2.hasNext())
 		{
 			textureatlassprite = (TextureAtlasSprite) iterator2.next();
@@ -507,11 +524,11 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 			}
 			catch (Throwable throwable)
 			{
-				/*CrashReport crashreport1 = CrashReport.makeCrashReport(throwable, "Stitching texture atlas");
+				*//*CrashReport crashreport1 = CrashReport.makeCrashReport(throwable, "Stitching texture atlas");
 				CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Texture being stitched together");
 				crashreportcategory1.addCrashSection("Atlas path", basePath);
 				crashreportcategory1.addCrashSection("Sprite", textureatlassprite);
-				throw new ReportedException(crashreport1);*/
+				throw new ReportedException(crashreport1);*//*
 				continue;
 			}
 
@@ -532,10 +549,15 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 			textureatlassprite = (TextureAtlasSprite) iterator2.next();
 			textureatlassprite.copyFrom(missingImage);
 		}
-		ForgeHooksClient.onTextureStitchedPost(map);
-		cpw.mods.fml.common.ProgressManager.pop(bar);
+		ForgeHooksClient.onTextureStitchedPost(map);*/
+		missingImage0 = missingImage;
+		stitcher0 = stitcher;
+		textureatlassprite0 = textureatlassprite;
+		p_110571_1_0 = p_110571_1_;
+		//cpw.mods.fml.common.ProgressManager.pop(bar);
+		//return mapRegisteredSprites;
 	}
-	private static void registerIcons()
+	/*private static void registerIcons()
 	{
 		mapRegisteredSprites.clear();
 		Iterator iterator;
@@ -569,16 +591,13 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 				item.registerIcons(map);
 			}
 		}
-	}
+	}*/
 	private static ResourceLocation completeResourceLocation(ResourceLocation p_147634_1_, int p_147634_2_)
 	{
 		return p_147634_2_ == 0 ? new ResourceLocation(p_147634_1_.getResourceDomain(), String.format("%s/%s%s", new Object[] { basePath, p_147634_1_.getResourcePath(), ".png" })) : new ResourceLocation(p_147634_1_.getResourceDomain(), String.format("%s/mipmaps/%s.%d%s", new Object[] { basePath, p_147634_1_.getResourcePath(), Integer.valueOf(p_147634_2_), ".png" }));
 	}
-	private static int getGlTextureId() {
-		return ATexture.getGlTextureId();
-	}
-	public static void ParallelUtils_set(/*TextureMap map, AbstractTexture ATexture, */String basePath0, int textureType0, int anisotropicFiltering0, List listAnimatedSprites0, Map mapRegisteredSprites0, Map mapUploadedSprites0, int mipmapLevels0) {
-		//this.map = map;
+	public static void ParallelUtils_set(TextureMap map0, /*AbstractTexture ATexture, */String basePath0, int textureType0, int anisotropicFiltering0, List listAnimatedSprites0, Map mapRegisteredSprites0, Map mapUploadedSprites0, int mipmapLevels0, int i_gl, Stitcher stitcher00, TextureAtlasSprite textureatlassprite00, TextureAtlasSprite missingImage00, IResourceManager p_110571_1_00) {
+		map = map0;
 		//this.ATexture = ATexture;
 		basePath = basePath0;
 		textureType = textureType0;
@@ -587,6 +606,22 @@ public class ParallelUtils /*implements ITextureObject, ITickableTextureObject, 
 		mapRegisteredSprites = mapRegisteredSprites0;
 		mapUploadedSprites = mapUploadedSprites0;
 		mipmapLevels = mipmapLevels0;
+		i0 = i_gl;
+		stitcher0 = stitcher00;
+		textureatlassprite0 = textureatlassprite00;
+		missingImage0 = missingImage00;
+		p_110571_1_0 = p_110571_1_00;
 	}
+	public static List getListAnimatedSprites() {return listAnimatedSprites;}
+	public static Stitcher getStitcher() {return stitcher0;}
+	public static TextureAtlasSprite getTextureAtlasSprite() {return textureatlassprite0;}
+	public static Map getmapRegisteredSprites() {return mapRegisteredSprites;}
+	public static Map getmapUploadedSprites() {return mapUploadedSprites;}
+	public static int mipmapLevels() {return mipmapLevels;}
+	public static String getbasePath() {return basePath;}
+	public static int gettextureType() {return textureType;}
+	public static TextureAtlasSprite getmissingImage() {return missingImage0;}
+	public static IResourceManager getp1105711() {return p_110571_1_0;}
+	public static TextureMap getTextureMap() {return map;}
 
 }

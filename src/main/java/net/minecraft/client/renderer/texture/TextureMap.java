@@ -44,15 +44,15 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 	private static final Logger logger = LogManager.getLogger();
 	public static final ResourceLocation locationBlocksTexture = new ResourceLocation("textures/atlas/blocks.png");
 	public static final ResourceLocation locationItemsTexture = new ResourceLocation("textures/atlas/items.png");
-	private final List listAnimatedSprites = Lists.newArrayList();
-	private final Map mapRegisteredSprites = Maps.newHashMap();
-	private final Map mapUploadedSprites = Maps.newHashMap();
+	private /*final */List listAnimatedSprites = Lists.newArrayList();
+	private /*final */Map mapRegisteredSprites = Maps.newHashMap();
+	private /*final */Map mapUploadedSprites = Maps.newHashMap();
 	/** 0 = terrain.png, 1 = items.png */
-	private final int textureType;
-	private final String basePath;
+	private /*final */int textureType;
+	private /*final */String basePath;
 	private int mipmapLevels;
 	private int anisotropicFiltering = 1;
-	private final TextureAtlasSprite missingImage = new TextureAtlasSprite("missingno");
+	private /*final */TextureAtlasSprite missingImage = new TextureAtlasSprite("missingno");
 	private static final String __OBFID = "CL_00001058";
 	private boolean skipFirst = false;
 
@@ -105,7 +105,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 
 	public void loadTextureAtlas(IResourceManager p_110571_1_)
 	{
-		/*registerIcons(); //Re-gather list of Icons, allows for addition/removal of blocks/items after this map was initially constructed.
+		registerIcons(); //Re-gather list of Icons, allows for addition/removal of blocks/items after this map was initially constructed.
 
 		int i = Minecraft.getGLMaximumTextureSize();
 		Stitcher stitcher = new Stitcher(i, i, true, 0, this.mipmapLevels);
@@ -114,8 +114,8 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 		int j = Integer.MAX_VALUE;
 		ForgeHooksClient.onTextureStitchedPre(this);
 		cpw.mods.fml.common.ProgressManager.ProgressBar bar = cpw.mods.fml.common.ProgressManager.push("Texture Loading", skipFirst ? 0 : this.mapRegisteredSprites.size());
-		Iterator iterator = this.mapRegisteredSprites.entrySet().iterator();
-		TextureAtlasSprite textureatlassprite;*/
+		//Iterator iterator = this.mapRegisteredSprites.entrySet().iterator();
+		TextureAtlasSprite textureatlassprite = null;
 
 		/* TODO 2 kek
 		while (!skipFirst && iterator.hasNext())
@@ -327,8 +327,63 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 		}
 		ForgeHooksClient.onTextureStitchedPost(this);
 		cpw.mods.fml.common.ProgressManager.pop(bar);*/
-		ParallelUtils.ParallelUtils_set(basePath, textureType, anisotropicFiltering, listAnimatedSprites, mapRegisteredSprites, mapUploadedSprites, mipmapLevels);
-		ParallelUtils.generateMipMaps_MultiThread3(p_110571_1_, missingImage);
+		//int i_gl = this.getGlTextureId();
+		ParallelUtils.ParallelUtils_set(this, basePath, textureType, anisotropicFiltering, listAnimatedSprites, mapRegisteredSprites, mapUploadedSprites, mipmapLevels, i, stitcher, textureatlassprite, missingImage, p_110571_1_);
+		ParallelUtils.generateMipMaps_MultiThread3();
+		//this = ParallelUtils.getTextureMap();
+		stitcher = ParallelUtils.getStitcher();
+		textureatlassprite = ParallelUtils.getTextureAtlasSprite();
+		listAnimatedSprites = ParallelUtils.getListAnimatedSprites();
+		mapRegisteredSprites = ParallelUtils.getmapRegisteredSprites();
+		mapUploadedSprites = ParallelUtils.getmapUploadedSprites();
+		textureType = ParallelUtils.gettextureType();
+		basePath = ParallelUtils.getbasePath();
+		missingImage = ParallelUtils.getmissingImage();
+		p_110571_1_ = ParallelUtils.getp1105711();
+		TextureUtil.allocateTextureImpl(this.getGlTextureId()/*i_gl*//*glTextureId*/, mipmapLevels, stitcher.getCurrentWidth(), stitcher.getCurrentHeight(), (float) anisotropicFiltering);
+		HashMap hashmap = new HashMap(mapRegisteredSprites);
+		Iterator iterator2 = stitcher.getStichSlots().iterator();
+
+		//bar.step("Uploading GL texture");
+		while (iterator2.hasNext())
+		{
+			textureatlassprite = (TextureAtlasSprite) iterator2.next();
+			String s = textureatlassprite.getIconName();
+			hashmap.remove(s);
+			mapUploadedSprites.put(s, textureatlassprite);
+
+			try
+			{
+				TextureUtil.uploadTextureMipmap(textureatlassprite.getFrameTextureData(0), textureatlassprite.getIconWidth(), textureatlassprite.getIconHeight(), textureatlassprite.getOriginX(), textureatlassprite.getOriginY(), false, false);
+			}
+			catch (Throwable throwable)
+			{
+				/*CrashReport crashreport1 = CrashReport.makeCrashReport(throwable, "Stitching texture atlas");
+				CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Texture being stitched together");
+				crashreportcategory1.addCrashSection("Atlas path", basePath);
+				crashreportcategory1.addCrashSection("Sprite", textureatlassprite);
+				throw new ReportedException(crashreport1);*/
+				continue;
+			}
+
+			if (textureatlassprite.hasAnimationMetadata())
+			{
+				listAnimatedSprites.add(textureatlassprite);
+			}
+			else
+			{
+				textureatlassprite.clearFramesTextureData();
+			}
+		}
+
+		iterator2 = hashmap.values().iterator();
+
+		while (iterator2.hasNext())
+		{
+			textureatlassprite = (TextureAtlasSprite) iterator2.next();
+			textureatlassprite.copyFrom(missingImage);
+		}
+		ForgeHooksClient.onTextureStitchedPost(this);//map?
 	}
 
 	private ResourceLocation completeResourceLocation(ResourceLocation p_147634_1_, int p_147634_2_)
